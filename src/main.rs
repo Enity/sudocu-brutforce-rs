@@ -7,9 +7,24 @@ use sudocu::Sudocu;
 const INITIAL_BACKTRACK_STEP: usize = 7;
 
 fn main() {
-    let mut r = Random::new();
-    let mut s = Sudocu::new();
+    let mut sudocus: Vec<Sudocu> = Vec::with_capacity(1000);
 
+    for s in 0..100 {
+        sudocus.push(Sudocu::new());
+    }
+
+    let mut r = Random::new();
+
+    for s in sudocus.iter_mut() {
+        brut(s, &mut r);
+    }
+
+    for s in sudocus.iter() {
+        s.print();
+    }
+}
+
+fn brut(s: &mut Sudocu, r: &mut Random) {
     let mut i = 0;
     let mut backtrack_step = INITIAL_BACKTRACK_STEP;
 
@@ -20,23 +35,26 @@ fn main() {
             v = match r.get_new() {
                 Some(v) => v,
                 None => {
-                    if i <= backtrack_step {
+                    if backtrack_step > 40 {
+                        s.clean(0);
                         i = 0;
+                        r.reset();
+                        backtrack_step = INITIAL_BACKTRACK_STEP;
+                        r.get_new().unwrap()
                     } else {
-                        i -= backtrack_step
+                        if i <= backtrack_step { i = 0; }
+                        else { i -= backtrack_step }
+                        s.clean(i);
+                        backtrack_step += 2;
+                        r.reset();
+                        r.get_new().unwrap()
                     }
-                    s.clean(i, i + backtrack_step);
-                    backtrack_step += 2;
-                    r.reset();
-                    r.get_new().unwrap()
+                    
                 }
             };
         }
 
         r.reset();
-        backtrack_step = INITIAL_BACKTRACK_STEP;
         i += 1;
     }
-
-    s.print();
 }

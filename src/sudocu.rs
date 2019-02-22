@@ -34,8 +34,8 @@ impl Sudocu {
         true
     }
 
-    pub fn clean(&mut self, start_ind: usize, end_ind: usize) {
-        for i in start_ind..end_ind {
+    pub fn clean(&mut self, start_ind: usize) {
+        for i in start_ind..self.map.len() {
             self.map[i] = 0;
         }
     }
