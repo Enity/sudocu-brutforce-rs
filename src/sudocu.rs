@@ -1,11 +1,11 @@
-#![feature(const_fn)]
+mod validator;
+
+use validator::check_not_exists;
 
 pub struct Sudocu {
-    map: [u8; 81],
+    pub map: [u8; 81],
     side_length: usize,
-    backtrack_step: usize,
-    last_backtrack_index: usize,
-    pub indexes_map: [([usize; 9], [usize; 9], [usize; 9]); 81],
+    indexes_map: [([usize; 9], [usize; 9], [usize; 9]); 81],
 }
 
 impl Sudocu {
@@ -13,15 +13,44 @@ impl Sudocu {
         let mut s = Sudocu {
             map: [0; 81],
             side_length: 9,
-            backtrack_step: 5,
-            last_backtrack_index: 0,
             indexes_map: [([0; 9], [0; 9], [0;9]); 81],
         };
         s.calculate_indexes_map();
         s
     }
 
-    pub fn calculate_indexes_map(&mut self) {
+    pub fn try_set(&mut self, index: usize, val: u8) -> bool {
+        if !check_not_exists(val, &self.indexes_map[index].0, &self.map) {
+            return false
+        }
+        if !check_not_exists(val, &self.indexes_map[index].1, &self.map) {
+            return false
+        }
+        if !check_not_exists(val, &self.indexes_map[index].2, &self.map) {
+            return false
+        }
+
+        self.map[index] = val;
+        true
+    }
+
+    pub fn clean(&mut self, start_ind: usize, end_ind: usize) {
+        for i in start_ind..end_ind {
+            self.map[i] = 0;
+        }
+    }
+
+    pub fn print(&self) {
+        for (i, item) in self.map.iter().enumerate() {
+            print!("{} ", item);
+            if (i + 1) % self.side_length == 0 {
+                print!("\n");
+            }
+        }
+        print!("\n");
+    }
+
+    fn calculate_indexes_map(&mut self) {
         for i in 0..self.map.len() {
             let mut start_pos: usize;
 
@@ -57,5 +86,20 @@ impl Sudocu {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_indexes_map() {
+        let s = Sudocu::new();
+        assert_eq!((
+            [36,37,38,39,40,41,42,43,44],
+            [5,14,23,32,41,50,59,68,77],
+            [30,31,32,39,40,41,48,49,50],
+        ), s.indexes_map[41])
     }
 }

@@ -1,20 +1,20 @@
 use rand::prelude::*;
 use std::collections::HashSet;
 
-struct Random {
+pub struct Random {
     cache: HashSet<u8>,
     rng: ThreadRng,
 }
 
 impl Random {
-    fn new() -> Random {
+    pub fn new() -> Random {
         Random {
             cache: HashSet::with_capacity(9),
             rng: thread_rng(),
         }
     }
 
-    fn get_new(&mut self) -> Option<u8> {
+    pub fn get_new(&mut self) -> Option<u8> {
         if self.cache.len() == 9 {
             None
         } else {
@@ -26,7 +26,7 @@ impl Random {
         }
     }
 
-    fn reset(&mut self) {
+    pub fn reset(&mut self) {
         self.cache.clear();
     }
 }
