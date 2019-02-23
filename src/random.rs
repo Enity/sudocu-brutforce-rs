@@ -1,33 +1,49 @@
 use rand::prelude::*;
-use std::collections::HashSet;
 
 pub struct Random {
-    cache: HashSet<u8>,
+    cache: [u8; 9],
+    current_index: usize,
     rng: ThreadRng,
 }
 
 impl Random {
     pub fn new() -> Random {
         Random {
-            cache: HashSet::with_capacity(9),
+            cache: [0; 9],
+            current_index: 0,
             rng: thread_rng(),
         }
     }
 
     pub fn get_new(&mut self) -> Option<u8> {
-        if self.cache.len() == 9 {
+        if self.current_index == 9 {
             None
         } else {
             let mut generated = self.rng.gen_range(1, 10);
-            while !self.cache.insert(generated) {
+            while !self.insert(generated) {
                 generated = self.rng.gen_range(1, 10);
             }
             Some(generated)
         }
     }
 
+    fn insert(&mut self, val: u8) -> bool {
+        for item in self.cache.iter_mut() {
+            if *item == val {
+                return false
+            }
+        }
+        self.cache[self.current_index] = val;
+        self.current_index += 1;
+        true
+    }
+
     pub fn reset(&mut self) {
-        self.cache.clear();
+        self.current_index = 0;
+
+        for item in self.cache.iter_mut() {
+            *item = 0;
+        }
     }
 }
 
@@ -39,8 +55,10 @@ mod tests {
     fn test_get_new_full() {
         let mut r = Random::new();
         for _ in 0..9 {
-            r.get_new();
+            assert_ne!(None, r.get_new());
         }
+        r.cache.sort();
+        assert_eq!(r.cache, [1,2,3,4,5,6,7,8,9]);
         assert_eq!(None, r.get_new());
     }
 
