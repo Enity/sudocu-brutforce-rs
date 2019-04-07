@@ -44,10 +44,10 @@ impl Sudocu {
         for (i, item) in self.map.iter().enumerate() {
             print!("{} ", item);
             if (i + 1) % self.side_length == 0 {
-                print!("\n");
+                println!();
             }
         }
-        print!("\n");
+        println!();
     }
 
     fn calculate_indexes_map(&mut self) {
