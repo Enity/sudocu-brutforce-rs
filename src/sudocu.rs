@@ -19,6 +19,13 @@ impl Sudocu {
         s
     }
 
+    pub fn fill(&mut self, data: &str) {
+        for (i, c) in data.chars().enumerate() {
+            let parsed = c.to_digit(10).expect("Invalid characted") as u8;
+            self.map[i] = parsed;
+        }
+    }
+
     pub fn try_set(&mut self, index: usize, val: u8) -> bool {
         if !check_not_exists(val, &self.indexes_map[index].0, &self.map) {
             return false
@@ -101,5 +108,13 @@ mod tests {
             [5,14,23,32,41,50,59,68,77],
             [30,31,32,39,40,41,48,49,50],
         ), s.indexes_map[41])
+    }
+
+    #[test]
+    fn test_fill() {
+        let mut s = Sudocu::new();
+        s.fill("006430580405000000310500200060750910502000308039028040007005029000000807043072100");
+        let expected: [u8; 81] = [0,0,6,4,3,0,5,8,0,4,0,5,0,0,0,0,0,0,3,1,0,5,0,0,2,0,0,0,6,0,7,5,0,9,1,0,5,0,2,0,0,0,3,0,8,0,3,9,0,2,8,0,4,0,0,0,7,0,0,5,0,2,9,0,0,0,0,0,0,8,0,7,0,4,3,0,7,2,1,0,0];
+        assert_eq!(expected[..], s.map[..]);
     }
 }
