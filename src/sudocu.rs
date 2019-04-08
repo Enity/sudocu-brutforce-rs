@@ -15,7 +15,7 @@ impl Sudocu {
             side_length: 9,
             indexes_map: [([0; 9], [0; 9], [0;9]); 81],
         };
-        s.calculate_indexes_map();
+        s.calculate_indexes();
         s
     }
 
@@ -57,7 +57,7 @@ impl Sudocu {
         println!();
     }
 
-    fn calculate_indexes_map(&mut self) {
+    fn calculate_indexes(&mut self) {
         for i in 0..self.map.len() {
             let mut start_pos: usize;
 
