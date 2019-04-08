@@ -5,6 +5,7 @@ use validator::check_not_exists;
 pub struct Sudocu {
     pub map: [u8; 81],
     side_length: usize,
+    frozen_indexes: [bool; 81],
     indexes_map: [([usize; 9], [usize; 9], [usize; 9]); 81],
 }
 
@@ -13,6 +14,7 @@ impl Sudocu {
         let mut s = Sudocu {
             map: [0; 81],
             side_length: 9,
+            frozen_indexes: [false; 81],
             indexes_map: [([0; 9], [0; 9], [0;9]); 81],
         };
         s.calculate_indexes();
@@ -21,12 +23,19 @@ impl Sudocu {
 
     pub fn fill(&mut self, data: &str) {
         for (i, c) in data.chars().enumerate() {
-            let parsed = c.to_digit(10).expect("Invalid characted") as u8;
+            let parsed = c.to_digit(10).expect("Invalid character") as u8;
             self.map[i] = parsed;
+
+            if parsed != 0 {
+                self.frozen_indexes[i] = true;
+            }
         }
     }
 
     pub fn try_set(&mut self, index: usize, val: u8) -> bool {
+        if self.frozen_indexes[index] {
+            return true;
+        }
         if !check_not_exists(val, &self.indexes_map[index].0, &self.map) {
             return false
         }
@@ -43,7 +52,9 @@ impl Sudocu {
 
     pub fn clean(&mut self, start_ind: usize) {
         for i in start_ind..self.map.len() {
-            self.map[i] = 0;
+            if !self.frozen_indexes[i] {
+                self.map[i] = 0;
+            }
         }
     }
 
@@ -114,7 +125,9 @@ mod tests {
     fn test_fill() {
         let mut s = Sudocu::new();
         s.fill("006430580405000000310500200060750910502000308039028040007005029000000807043072100");
-        let expected: [u8; 81] = [0,0,6,4,3,0,5,8,0,4,0,5,0,0,0,0,0,0,3,1,0,5,0,0,2,0,0,0,6,0,7,5,0,9,1,0,5,0,2,0,0,0,3,0,8,0,3,9,0,2,8,0,4,0,0,0,7,0,0,5,0,2,9,0,0,0,0,0,0,8,0,7,0,4,3,0,7,2,1,0,0];
-        assert_eq!(expected[..], s.map[..]);
+        let expected_indexes: [u8; 81] = [0,0,6,4,3,0,5,8,0,4,0,5,0,0,0,0,0,0,3,1,0,5,0,0,2,0,0,0,6,0,7,5,0,9,1,0,5,0,2,0,0,0,3,0,8,0,3,9,0,2,8,0,4,0,0,0,7,0,0,5,0,2,9,0,0,0,0,0,0,8,0,7,0,4,3,0,7,2,1,0,0];
+        assert_eq!(expected_indexes[..], s.map[..]);
+        let expected_frozen = [false,false,true,true,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,true,false,true,false,false,true,false,false,false,true,false,true,true,false,true,true,false,true,false,true,false,false,false,true,false,true,false,true,true,false,true,true,false,true,false,false,false,true,false,false,true,false,true,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,true,true,false,false];
+        assert_eq!(expected_frozen[..], s.frozen_indexes[..]);
     }
 }

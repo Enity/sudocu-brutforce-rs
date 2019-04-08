@@ -5,17 +5,23 @@ mod sudocu;
 
 use random::Random;
 use sudocu::Sudocu;
+use std::env;
 
 const INITIAL_BACKTRACK_STEP: usize = 2;
 
 fn main() {
-    let mut r = Random::new();
-    let mut s = Sudocu::new();
+    let args: Vec<String> = env::args().collect();
 
-    for _ in 0..100 {
+    if args.len() < 2 {
+        println!("Cannot find sudoku in args");
+    } else {
+        let mut s = Sudocu::new();
+        let mut r = Random::new();
+
+        s.fill(&args[1]);
         brut(&mut s, &mut r);
+
         s.print();
-        s.clean(0);
     }
 }
 
